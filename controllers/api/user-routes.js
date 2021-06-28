@@ -1,9 +1,21 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Comment } = require('../../models');
 
 // GET /api/users
 router.get('/', (req, res) => {
-    User.findAll()
+    User.findAll({
+        attributes: ['id', 'username', 'email', 'password'],
+        include: [
+            {
+            model: Comment,
+            attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+            },
+            {
+            model: Post,
+            attributes: ['id', 'title', 'post_url', 'user_id'],
+            },
+        ],
+    })
     .then(dbUserData => res.json(dbUserData))
     .catch(err => {
         console.log(err);
@@ -20,11 +32,10 @@ router.get('/:id', (req, res) => {
         },
         include: {
             model: Post,
-            attributes: ['id', 'title', 'created_at'],
+            attributes: ['id', 'title', 'post_url', 'user_id'],
         },
         model: Comment,
-        attributes: ['id', 'comment_text']
-  
+        attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'], 
     })
     .then(dbUserData => {
         if (!dbUserData) {
@@ -45,12 +56,20 @@ router.post('/', (req, res) => {
         email: req.body.email,
         password: req.body.password
     })
-    .then(dbUserData => res.json(dbUserData))
-    .catch(err => {
-        console.log(err);
-        res.status(500).json(err);
+    .then(dbUserData => {
+        req.session.save(() => {
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+            res.json(dbUserData);
+        });
     });
-});
+    // .then(dbUserData => res.json(dbUserData))
+    // .catch(err => {
+    //     console.log(err);
+    //     res.status(500).json(err);
+    });
+
 
 // PUT /api/users/1
 router.put('/:id', (req, res) => {
@@ -76,7 +95,6 @@ router.put('/:id', (req, res) => {
 
 // DELETE /api/users/1
 router.delete('/:id', (req, res) => {
-    router.delete('/:id', (req, res) => {
         User.destroy({
           where: {
             id: req.params.id
@@ -94,6 +112,6 @@ router.delete('/:id', (req, res) => {
             res.status(500).json(err);
           });
       });
-});
+
 
 module.exports = router;
