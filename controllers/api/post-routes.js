@@ -1,35 +1,34 @@
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Comment } = require('../../models');
 
 
 
-// get all users
+// get all 
 router.get('/', (req, res) => {
-    Post.findAll({
-      attributes: ['id', 'post_url', 'title', 'created_at'],
-      include: [
-        {
-          model: User,
-          attributes: ['username']
-        }
-      ]
-    })
-      .then(dbPostData => res.json(dbPostData))
-      .catch(err => {
-        console.log(err);
-        res.status(500).json(err);
-      });
-  });
-  
+//     Post.findAll({
+//       attributes: ['id', 'post_url', 'title', 'created_at'],
+//       include: [
+//         {
+//           model: User,
+//           attributes: ['id', 'username', 'email', 'password']
+//         }
+//       ]
+//     })
+//       .then(dbPostData => res.json(dbPostData))
+//       .catch(err => {
+//         console.log(err);
+//         res.status(500).json(err);
+//       });
+//   });
 
-Post.findAll({
+   Post.findAll({
     order: [['created_at', 'DESC']],
     attributes: [
       'id',
       'post_url',
       'title',
       'created_at',
-      [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+
     ],
     include: [
       // include the Comment model here:
@@ -38,15 +37,23 @@ Post.findAll({
         attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
         include: {
           model: User,
-          attributes: ['username']
+          attributes: ['id', 'username', 'email', 'password']
         }
       },
       {
         model: User,
-        attributes: ['username']
+        attributes: ['id', 'username', 'email', 'password']
       }
     ]
+   })
+   .then(dbPostData => res.json(dbPostData))
+   .catch(err => {
+     console.log(err);
+     res.status(500).json(err);
    });
+
+});
+
 
    router.get('/:id', (req, res) => {
     Post.findOne({

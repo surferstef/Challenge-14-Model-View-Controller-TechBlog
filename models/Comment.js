@@ -1,12 +1,13 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
 
-class Vote extends Model {}
+class Comment extends Model {}
 
-Vote.init(
+Comment.init(
     {
       id: {
         type: DataTypes.INTEGER,
+        allowNull: false,
         primaryKey: true,
         autoIncrement: true
       },
@@ -24,7 +25,15 @@ Vote.init(
         references: {
           model: 'post',
           key: 'id'
+        },
+      comment_text: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        // 1 char at least
+        validate: {
+          len: [1]
         }
+      }
       }
     },
     {
