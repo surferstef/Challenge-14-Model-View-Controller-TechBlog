@@ -16,7 +16,14 @@ router.get('/:id', (req, res) => {
     User.findOne({
         where: {
             id: req.params.id
-        }
+        },
+        include: {
+            model: Post,
+            attributes: ['id', 'title', 'created_at'],
+        },
+        model: Comment,
+        attributes: ['id', 'comment_text']
+  
     })
     .then(dbUserData => {
         if (!dbUserData) {
