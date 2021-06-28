@@ -57,6 +57,7 @@ router.post('/', (req, res) => {
         password: req.body.password
     })
     .then(dbUserData => {
+        //access session information in the routes
         req.session.save(() => {
             req.session.user_id = dbUserData.id;
             req.session.username = dbUserData.username;
@@ -69,6 +70,42 @@ router.post('/', (req, res) => {
     //     console.log(err);
     //     res.status(500).json(err);
     });
+
+router.post('/login', (req, res) => {
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    })
+    .then(dbUserData => {
+        if(!dbUserData) {
+            res.status(400).json({
+                message: 'Use with that email address not found!' 
+            });
+            return;
+        }
+        const validPassword = dbUserData.checkPassword(req.body.password);
+
+        if (!validPassword) {
+            res.status(400).json({
+                message: 'Wrong Password!'
+            });
+            return;
+        }
+
+        req.session.save(() => {
+            // declare session variables
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
+
+            res.json({
+                user: dbUserData, 
+                message: ' You are now logged in!'
+            });
+        });
+    });
+});
 
 
 // PUT /api/users/1
