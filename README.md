@@ -19,6 +19,8 @@ This application builds a CMS-style blog site similar to a Wordpress site, where
 * Sequelize.js
 * dotenv
 
+## Heroku App Deployment
+https://peaceful-anchorage-42228.herokuapp.com/
 
 ## Contributors
 Stefan Hall
